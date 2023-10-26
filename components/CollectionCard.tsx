@@ -124,7 +124,6 @@ function CollectionCard({ collection }: CollectionCardProps) {
           )}
           <Separator />
           <footer className="h-[40px] px-4 p-[2px] text-xs text-neutral-500 flex justify-between items-center">
-            Footer
             <p>Created at {collection.createdAt.toDateString()} </p>
             {isLoading && <div>Deleting...</div>}
             {!isLoading && (
