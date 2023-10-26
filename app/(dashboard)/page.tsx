@@ -1,8 +1,9 @@
+import CollectionCard from '@/components/CollectionCard';
 import CreateCollectionButton from '@/components/CreateCollectionButton';
 import SadFace from '@/components/icons/SadFace';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs';
 import { Suspense } from 'react';
 
@@ -22,6 +23,8 @@ export default async function Home() {
 async function CollectionList() {
   const user = await currentUser();
   const collections = await prisma.collection.findMany({
+    include: { tasks: true },
+
     where: { userId: user?.id },
   });
 
@@ -39,6 +42,17 @@ async function CollectionList() {
       </div>
     );
   }
+
+  return (
+    <>
+      <CreateCollectionButton />
+      <div className="flex flex-col gap-4 mt-6">
+        {collections.map((collection) => (
+          <CollectionCard key={collection.id} collection={collection} />
+        ))}
+      </div>
+    </>
+  );
 }
 
 function WelcomeMsgFallback() {

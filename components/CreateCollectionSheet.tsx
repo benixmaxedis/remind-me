@@ -1,14 +1,17 @@
-import React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-
+import React, { useState } from 'react';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet';
+} from './ui/sheet';
+import { useForm } from 'react-hook-form';
+import {
+  createCollectionSchema,
+  createCollectionSchemaType,
+} from '@/schema/createCollection';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Form,
   FormControl,
@@ -17,43 +20,54 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import {
-  createCollectionSchema,
-  createCollectionSchemaType,
-} from '@/schema/createCollection';
-import { Input } from '@/components/ui/input';
+} from './ui/form';
+import { Input } from './ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from './ui/select';
 import { CollectionColor, CollectionColors } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { createCollection } from './actions/collections';
+import { Separator } from './ui/separator';
+import { Button } from './ui/button';
+import { createCollection } from '@/actions/collection';
 
-interface SideBarProps {
+import { ReloadIcon } from '@radix-ui/react-icons';
+import { useRouter } from 'next/navigation';
+import { toast } from './ui/use-toast';
+
+interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-function SideBar({ open, onOpenChange }: SideBarProps) {
+function CreateCollectionSheet({ open, onOpenChange }: Props) {
+  const router = useRouter();
+
   const form = useForm<createCollectionSchemaType>({
     resolver: zodResolver(createCollectionSchema),
-    defaultValues: {},
+    defaultValues: { name: 'Personal' },
   });
 
   const onSubmit = async (data: createCollectionSchemaType) => {
     try {
       await createCollection(data);
+      openChangeWrapper(false);
+      router.refresh();
+      toast({
+        title: 'Success',
+        description: 'Collection created successfully',
+      });
     } catch (error: any) {
       // Show toast
-      alert('ERROR');
-      console.log('Error while creating collection', error);
+      toast({
+        title: 'Error',
+        description: 'Something went wrong. Please try again later',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -138,13 +152,18 @@ function SideBar({ open, onOpenChange }: SideBarProps) {
         <div className="flex flex-col gap-3 mt-4">
           <Separator />
           <Button
-            onClick={form.handleSubmit(onSubmit)}
+            disabled={form.formState.isSubmitting}
+            variant={'outline'}
             className={cn(
               form.watch('color') &&
                 CollectionColors[form.getValues('color') as CollectionColor]
             )}
+            onClick={form.handleSubmit(onSubmit)}
           >
             Confirm
+            {form.formState.isSubmitting && (
+              <ReloadIcon className="ml-2 h-4 w-4 animate-spin" />
+            )}
           </Button>
         </div>
       </SheetContent>
@@ -152,4 +171,4 @@ function SideBar({ open, onOpenChange }: SideBarProps) {
   );
 }
 
-export default SideBar;
+export default CreateCollectionSheet;

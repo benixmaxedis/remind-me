@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import SideBar from '@/components/SideBar';
+import SideBar from '@/components/CreateCollectionSheet';
 
 function CreateCollectionButton() {
   const [open, setOpen] = useState(false);
